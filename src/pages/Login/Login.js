@@ -4,10 +4,19 @@ import icons from '~/assets/icons/icons';
 import Button from '~/components/Button';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 const Login = () => {
+    const [user, setUser] = useState([
+        {
+            email: '',
+            password: '',
+        },
+    ]);
+    const navigate = useNavigate(); // <--- initialize useHistory
     const regexEmail =
         /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+[^<>()\.,;:\s@\"]{2,})$/;
 
@@ -26,9 +35,42 @@ const Login = () => {
                 .matches(/^(?=.*[0-9]).{8,}$/, 'Mật khẩu chứa chữ số'),
         }),
         onSubmit: (values) => {
-            console.log(values);
+            const dataSubmit = {
+                email: values.email,
+                password: values.password
+            }
+            setUser(dataSubmit)
         },
     });
+
+    useEffect(() => {
+        console.log(user)
+        fetch('http://localhost:8000/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(user),
+        })
+            .then((response) => response.json())
+            .then(
+                (data) => {
+                    console.log(data)
+                if (data.login) {
+                    alert('Login successful');
+                    localStorage.setItem('access-token', data.token);
+                    navigate('/');
+                }
+
+            },
+            // Note: it's important to handle errors here
+            // instead of a catch() block so that we don't swallow
+            // exceptions from actual bugs in components.
+            (error) => {
+              console.log(error)
+            }
+            )
+    }, [user, navigate]);
 
     return (
         <div className={cx('wrapper')}>

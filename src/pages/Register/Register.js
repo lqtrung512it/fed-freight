@@ -4,10 +4,22 @@ import icons from '~/assets/icons/icons';
 import Button from '~/components/Button/Button';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useState, useEffect } from 'react';
 
 const cx = classNames.bind(styles);
 
 const Register = () => {
+    const [user, setUser] = useState([
+        {
+            username: '',
+            email: '',
+            password: '',
+            role: '',
+        },
+    ]);
+    const [message, setMessage] = useState('');
+    const [countdown, setCountdown] = useState(3);
+
     const regexEmail =
         /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+[^<>()\.,;:\s@\"]{2,})$/;
 
@@ -30,15 +42,55 @@ const Register = () => {
             role: Yup.string().required('Vui lòng chọn vai trò'),
         }),
         onSubmit: (values) => {
-            console.log(values);
+            setUser({
+                username: values.username,
+                email: values.email,
+                password: values.password,
+                role: values.role,
+            });
         },
     });
+
+    useEffect(() => {
+        fetch('http://localhost:8000/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(user),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                if (data.register) {
+                    setMessage('Đăng ký thành công! ');
+                    const interval = setInterval(() => {
+                        setCountdown((prevCountdown) => prevCountdown - 1);
+                    }, 1000);
+                    return () => clearInterval(interval); // cleanup interval on unmount
+                }
+            })
+            .catch(console.error());
+    }, [user]);
+
+    useEffect(() => {
+        if (countdown === 0) {
+            // navigate to login page
+            window.location.href = '/login'; // or use a router, e.g. React Router
+        }
+    }, [countdown]);
 
     return (
         <div className={cx('wrapper')}>
             <div className={cx('inner')}>
                 <h2>Đăng Ký</h2>
-                <form action="#" onSubmit={formik.handleSubmit} autoComplete="off">
+                {message && (
+                    <div>
+                        <h1>{message}</h1>
+                        <p>Redirecting to login page in {countdown} seconds...</p>
+                    </div>
+                )}
+                <form action="#" onSubmit={formik.handleSubmit}>
                     <div className={cx('input-box')}>
                         <img src={icons.username} alt="" className={cx('icon')}></img>
                         <input

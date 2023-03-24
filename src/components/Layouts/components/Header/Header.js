@@ -2,16 +2,20 @@ import classNames from 'classnames/bind';
 import styles from './Header.module.scss';
 import icons from '~/assets/icons';
 import Button from '~/components/Button';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Tippy from '@tippyjs/react/headless';
 import 'tippy.js/dist/tippy.css';
 import { Wrapper as PopperWrapper } from '~/components/Popper';
+import jwtDecode from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const navigate = useNavigate(); // <--- initialize useHistory
     // change color when scrolling
     const [color, setColor] = useState(false);
+    const [userName, setUserName] = useState('');
     const changeColor = () => {
         if (window.scrollY > 0) {
             setColor(true);
@@ -23,6 +27,25 @@ function Header() {
 
     // change button content based on the path
     const pathName = window.location.pathname;
+
+    function getUsernameFromToken(token) {
+        try {
+            const decodedToken = jwtDecode(token);
+            console.log(decodedToken);
+            return decodedToken.user;
+        } catch (error) {
+            if (error.name === 'InvalidTokenError') {
+                console.log('Invalid token specified');
+            } else {
+                console.log('Error decoding token:', error.message);
+            }
+        }
+    }
+
+    useEffect(() => {
+        const userName = localStorage.getItem('access-token');
+        setUserName(getUsernameFromToken(userName));
+    }, []);
 
     // display notifications
     // const []
@@ -61,60 +84,71 @@ function Header() {
                                     Liên Lạc
                                 </Button>
                             </li>
-                            <li>
-                                {pathName === '/login' ? (
-                                    <Button redirectPage to="/register">
-                                        Đăng Ký
-                                    </Button>
-                                ) : (
-                                    <Button redirectPage to="/login">
-                                        Đăng Nhập
-                                    </Button>
-                                )}
-                            </li>
-                            <li>
-                                <Tippy content="Notifications">
-                                    <img
-                                        src={color ? icons.bell : icons.whiteBell}
-                                        alt="Notification"
-                                        className={cx('icon')}
-                                    ></img>
-                                </Tippy>
-                            </li>
-                            <li>
-                                <Tippy
-                                    placement="bottom"
-                                    interactive
-                                    render={(attrs) => (
-                                        <PopperWrapper>
-                                            <h4 className={cx('option')}>Tùy chọn</h4>
-                                            <Button option to="/">
-                                                Xem Hồ sơ
-                                            </Button>
-                                            <Button option to="/">
-                                                Xem Lịch sử
-                                            </Button>
-                                            <Button option to="/">
-                                                Xem Lịch sử
-                                            </Button>
-                                            <Button option to="/">
-                                                Đăng xuất
-                                            </Button>
-                                        </PopperWrapper>
+                            {userName ? (
+                                <>
+                                    <li>
+                                        <Tippy content="Notifications">
+                                            <img
+                                                src={color ? icons.bell : icons.whiteBell}
+                                                alt="Notification"
+                                                className={cx('icon')}
+                                            ></img>
+                                        </Tippy>
+                                    </li>
+                                    <li>
+                                        <Tippy
+                                            placement="bottom"
+                                            interactive
+                                            render={(attrs) => (
+                                                <PopperWrapper>
+                                                    <h4 className={cx('option')}>Tùy chọn</h4>
+                                                    <Button option to="/">
+                                                        Xem Hồ sơ
+                                                    </Button>
+                                                    <Button option to="/">
+                                                        Xem Lịch sử
+                                                    </Button>
+                                                    <Button option to="/">
+                                                        Xem Lịch sử
+                                                    </Button>
+
+                                                    <Button option to="/"
+                                                    onClick={() => {
+                                                        localStorage.removeItem('access-token');
+                                                        window.location.reload(true)
+                                                    }}
+                                                    >
+                                                        Đăng Xuất
+                                                    </Button>
+                                                </PopperWrapper>
+                                            )}
+                                        >
+                                            <img
+                                                src={color ? icons.dropdown : icons.whiteDropdown}
+                                                alt="Options"
+                                                className={cx('icon')}
+                                            ></img>
+                                        </Tippy>
+                                    </li>
+                                    <li>
+                                        <Button text to="/">
+                                            {userName}
+                                        </Button>
+                                    </li>
+                                </>
+                            ) : (
+                                <li>
+                                    {pathName === '/login' ? (
+                                        <Button redirectPage to="/register">
+                                            Đăng Ký
+                                        </Button>
+                                    ) : (
+                                        <Button redirectPage to="/login">
+                                            Đăng Nhập
+                                        </Button>
                                     )}
-                                >
-                                    <img
-                                        src={color ? icons.dropdown : icons.whiteDropdown}
-                                        alt="Options"
-                                        className={cx('icon')}
-                                    ></img>
-                                </Tippy>
-                            </li>
-                            <li>
-                                <Button text to="/">
-                                    Nguỹn Hòng Nguyn
-                                </Button>
-                            </li>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>
