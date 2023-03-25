@@ -6,6 +6,7 @@ import Register from '~/pages/Register';
 import ContributorList from '~/pages/ContributorList';
 import Chat from '~/pages/Chat';
 import UploadAvatar from '~/pages/UploadAvatar'
+import Tracking from '~/pages/Tracking';
 
 // Public Routes: Access without login
 const publicRoutes = [
@@ -15,9 +16,14 @@ const publicRoutes = [
     { path: '/contributorList', component: ContributorList, layout: HavingSidebar },
     { path: '/chat', component: Chat },
     { path: '/uploadAvatar', component: UploadAvatar },
+    { path: '/tracking', component: Tracking, layout: HavingSidebar },
+    
 ];
 
 // Public Routes: Access within login
-const privateRoutes = [{ path: '/chat', component: Chat }];
+const privateRoutes = [
+    { path: '/chat', component: Chat },
+    { path: '/uploadAvatar', component: UploadAvatar },
+];
 
 export { publicRoutes, privateRoutes };

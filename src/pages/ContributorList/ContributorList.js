@@ -3,9 +3,9 @@ import styles from './ContributorList.module.scss';
 import icons from '~/assets/icons/icons';
 import Button from '~/components/Button';
 import Contributor from '~/components/Contributor';
+import { useEffect, useState } from 'react';
 import Tippy from '@tippyjs/react/headless';
 import 'tippy.js/dist/tippy.css';
-import { useEffect, useState } from 'react';
 import { Wrapper as PopperWrapper } from '~/components/Popper';
 import UserBox from '~/components/UserBox';
 
